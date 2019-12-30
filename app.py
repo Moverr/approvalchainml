@@ -110,6 +110,8 @@ def showjson():
 @app.route('/')
 def index():
     #   this is where the magic is begininig
+    output = {}
+    
     try:
 
         SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -121,6 +123,11 @@ def index():
         #     data = json.load(f)
 
         print(data['False'][0])
+
+        output['data'] =(data)
+
+
+
 
         positive_data = data['True']
         negative_data = data['False']
@@ -156,6 +163,8 @@ def index():
 
         freq_dist_pos = FreqDist(all_pos_words)
         print(freq_dist_pos.most_common(10))
+        output['most_common-10'] =(freq_dist_pos.most_common(10))
+        
 
         positive_tokens_for_model = get_tweets_for_model(
             positive_cleaned_tokens_list)
@@ -173,6 +182,8 @@ def index():
         random.shuffle(dataset)
 
         print(len(dataset))
+        output['dataset-legth'] =(len(dataset))
+      
 
         train_data = dataset[:5]
         test_data = dataset[5:]
@@ -182,8 +193,11 @@ def index():
 
         MultinomialNBclassifier = SklearnClassifier(MultinomialNB())
         MultinomialNBclassifier.train(train_data)
+        
+        output['nMultinomialNB-ACCURACY'] =(  (classify.accuracy(MultinomialNBclassifier, test_data)) * 100) 
+      
         print("\nMultinomialNB Accuracy is:",
-              (classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
+              (nltk.classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
 
         # GaussianNBclassifier = SklearnClassifier(GaussianNB())
         # GaussianNBclassifier.train(train_data)
@@ -194,25 +208,42 @@ def index():
         print("BernoulliNB_classifier Algo Accuracy: ",
               (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
 
+        output['BernoulliNB_classifier-ACCURACY'] =(  (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100) 
+      
+
+
         LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
         LogisticRegression_classifier.train(train_data)
         print("LogisticRegression Algo Accuracy: ",      (nltk.classify.accuracy(
             LogisticRegression_classifier, test_data)) * 100)
+
+        output['LogisticRegression-ACCURACY'] =(  (nltk.classify.accuracy(LogisticRegression_classifier, test_data)) * 100) 
+      
+
 
         SGDClassifier_classifier = SklearnClassifier(SGDClassifier())
         SGDClassifier_classifier.train(train_data)
         print("SGDClassifier Algo Accuracy: ",
               (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100)
 
+        output['SGDClassifier-ACCURACY'] =(  (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100) 
+      
+
         SVC_classifier = SklearnClassifier(SVC())
         SVC_classifier.train(train_data)
         print("SVC Algo Accuracy: ",
               (nltk.classify.accuracy(SVC_classifier, test_data)) * 100)
+ 
+        output['SVC-ACCURACY'] =(  (nltk.classify.accuracy(SVC_classifier, test_data)) * 100) 
+      
 
         LinearSVC_classifier = SklearnClassifier(LinearSVC())
         LinearSVC_classifier.train(train_data)
         print("LinearSVC Algo Accuracy: ",
               (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100)
+      
+        output['LinearSVC-ACCURACY'] =(  (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100) 
+      
 
         NuSVC_classifier = SklearnClassifier(NuSVC(gamma='auto'))
 
@@ -220,17 +251,31 @@ def index():
         print("NuSVC Algo Accuracy: ",
               (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100)
 
+        output['NuSVC-ACCURACY'] =(  (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100) 
+      
+
         classifier = NaiveBayesClassifier.train(train_data)
 
         print("Accuracy is:", classify.accuracy(classifier, test_data))
 
+        output['NaiveBayesClassifier-ACCURACY'] =(  (nltk.classify.accuracy(classifier, test_data)) * 100) 
+      
+
+
         print(classifier.show_most_informative_features(10))
 
-        custom_tweet = " Bobiwine is contesting for presidency in 2021"
+        output['classifier-show_most_informative_features'] =( classifier.show_most_informative_features(10) ) 
+      
 
-        custom_tokens = remove_noise(word_tokenize(custom_tweet))
+        custom_content = " Bobiwine is contesting for presidency in 2021"
 
-        print(custom_tweet, classifier.classify(
+        output['custom-content'] = custom_content 
+      
+
+
+        custom_tokens = remove_noise(word_tokenize(custom_content))
+
+        print(custom_content, classifier.classify(
             dict([token, True] for token in custom_tokens)))
 
         voted_classifier = VoteClassifier(classifier, MultinomialNBclassifier, BernoulliNB_classifier,
@@ -238,10 +283,15 @@ def index():
 
         print("Voted Classifier Algo Accuracy: ",
               (nltk.classify.accuracy(voted_classifier, test_data)) * 100)
+
+        output['Voted Classifier Algo Accuracy'] =((nltk.classify.accuracy(voted_classifier, test_data)) * 100)
+
+      
+
     except:
         print("An exception occurred")
 
-    return 'Expected'
+    return jsonify(output)
 
 
 if __name__ == '__main__':
