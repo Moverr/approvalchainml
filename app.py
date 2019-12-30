@@ -239,6 +239,8 @@ def index():
     except:
         print("An exception occurred")
 
+    return 'Expected'
+
 
 if __name__ == '__main__':
     app.run(debug=False)
