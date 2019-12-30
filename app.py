@@ -1,6 +1,6 @@
 #!flask/bin/python
-from flask import Flask, render_template, url_for, json,jsonify
- 
+from flask import Flask, render_template, url_for, json, jsonify
+
 
 import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -16,7 +16,7 @@ from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC, LinearSVC, NuSVC
 
 import os
- 
+
 
 import re
 import string
@@ -99,6 +99,7 @@ def get_tweets_for_model(cleaned_tokens_list):
 
 app = Flask(__name__)
 
+
 def showjson():
     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
     json_url = os.path.join(SITE_ROOT, "static/data", "data.json")
@@ -109,134 +110,134 @@ def showjson():
 @app.route('/')
 def index():
     #   this is where the magic is begininig
+    try:
 
-    SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-    json_url = os.path.join(SITE_ROOT, "static", "data.json")
-    data = json.load(open(json_url))
-    
- 
-    # data ={}
-    # with open(data_file) as f:
-    #     data = json.load(f)
+        SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+        json_url = os.path.join(SITE_ROOT, "static", "data.json")
+        data = json.load(open(json_url))
 
-    print(data['False'][0])
+        # data ={}
+        # with open(data_file) as f:
+        #     data = json.load(f)
 
-    positive_data = data['True']
-    negative_data = data['False']
+        print(data['False'][0])
 
-    positive_data_tokens = []
-    negative_data_tokens = []
+        positive_data = data['True']
+        negative_data = data['False']
 
-    for sentence in positive_data:
-        # todo:  tockenize this then append
-        positive_data_tokens.append(nltk.word_tokenize(sentence))
+        positive_data_tokens = []
+        negative_data_tokens = []
 
-    for sentence in negative_data:
-        # todo:  tockenize this then append
-        negative_data_tokens.append(nltk.word_tokenize(sentence))
+        for sentence in positive_data:
+            # todo:  tockenize this then append
+            positive_data_tokens.append(nltk.word_tokenize(sentence))
 
-    stop_words = stopwords.words('english')
+        for sentence in negative_data:
+            # todo:  tockenize this then append
+            negative_data_tokens.append(nltk.word_tokenize(sentence))
 
-    # positive_data_tokens = twitter_samples.tokenized('positive_data.json')
-    # negative_data_tokens = twitter_samples.tokenized('negative_data.json')
+        stop_words = stopwords.words('english')
 
-    positive_cleaned_tokens_list = []
-    negative_cleaned_tokens_list = []
+        # positive_data_tokens = twitter_samples.tokenized('positive_data.json')
+        # negative_data_tokens = twitter_samples.tokenized('negative_data.json')
 
-    for tokens in positive_data_tokens:
-        positive_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+        positive_cleaned_tokens_list = []
+        negative_cleaned_tokens_list = []
 
-    for tokens in negative_data_tokens:
-        negative_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+        for tokens in positive_data_tokens:
+            positive_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
 
-    all_pos_words = get_all_words(positive_cleaned_tokens_list)
+        for tokens in negative_data_tokens:
+            negative_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
 
-    freq_dist_pos = FreqDist(all_pos_words)
-    print(freq_dist_pos.most_common(10))
+        all_pos_words = get_all_words(positive_cleaned_tokens_list)
 
-    positive_tokens_for_model = get_tweets_for_model(
-        positive_cleaned_tokens_list)
-    negative_tokens_for_model = get_tweets_for_model(
-        negative_cleaned_tokens_list)
+        freq_dist_pos = FreqDist(all_pos_words)
+        print(freq_dist_pos.most_common(10))
 
-    positive_dataset = [(tweet_dict, "Positive")
-                        for tweet_dict in positive_tokens_for_model]
+        positive_tokens_for_model = get_tweets_for_model(
+            positive_cleaned_tokens_list)
+        negative_tokens_for_model = get_tweets_for_model(
+            negative_cleaned_tokens_list)
 
-    negative_dataset = [(tweet_dict, "Negative")
-                        for tweet_dict in negative_tokens_for_model]
+        positive_dataset = [(tweet_dict, "Positive")
+                            for tweet_dict in positive_tokens_for_model]
 
-    dataset = positive_dataset + negative_dataset
+        negative_dataset = [(tweet_dict, "Negative")
+                            for tweet_dict in negative_tokens_for_model]
 
-    random.shuffle(dataset)
+        dataset = positive_dataset + negative_dataset
 
-    print(len(dataset))
+        random.shuffle(dataset)
 
-    train_data = dataset[:5]
-    test_data = dataset[5:]
+        print(len(dataset))
 
+        train_data = dataset[:5]
+        test_data = dataset[5:]
 
-    names = ["MultinomialNBclassifier", "BernoulliNB", "LogisticRegression_classifier", "SGDClassifier_classifier ",
-            "SVC_classifier", "LinearSVC_classifier", "NaiveBayesClassifier"]
+        names = ["MultinomialNBclassifier", "BernoulliNB", "LogisticRegression_classifier", "SGDClassifier_classifier ",
+                "SVC_classifier", "LinearSVC_classifier", "NaiveBayesClassifier"]
 
-    MultinomialNBclassifier = SklearnClassifier(MultinomialNB())
-    MultinomialNBclassifier.train(train_data)
-    print("\nMultinomialNB Accuracy is:",
-        (classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
+        MultinomialNBclassifier = SklearnClassifier(MultinomialNB())
+        MultinomialNBclassifier.train(train_data)
+        print("\nMultinomialNB Accuracy is:",
+            (classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
 
-    # GaussianNBclassifier = SklearnClassifier(GaussianNB())
-    # GaussianNBclassifier.train(train_data)
-    # print("\nGaussianNB Accuracy is:", classify.accuracy(GaussianNBclassifier, test_data))
+        # GaussianNBclassifier = SklearnClassifier(GaussianNB())
+        # GaussianNBclassifier.train(train_data)
+        # print("\nGaussianNB Accuracy is:", classify.accuracy(GaussianNBclassifier, test_data))
 
-    BernoulliNB_classifier = SklearnClassifier(BernoulliNB())
-    BernoulliNB_classifier.train(train_data)
-    print("BernoulliNB_classifier Algo Accuracy: ",
-        (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
+        BernoulliNB_classifier = SklearnClassifier(BernoulliNB())
+        BernoulliNB_classifier.train(train_data)
+        print("BernoulliNB_classifier Algo Accuracy: ",
+            (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
 
-    LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
-    LogisticRegression_classifier.train(train_data)
-    print("LogisticRegression Algo Accuracy: ",      (nltk.classify.accuracy(
-        LogisticRegression_classifier, test_data)) * 100)
+        LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
+        LogisticRegression_classifier.train(train_data)
+        print("LogisticRegression Algo Accuracy: ",      (nltk.classify.accuracy(
+            LogisticRegression_classifier, test_data)) * 100)
 
-    SGDClassifier_classifier = SklearnClassifier(SGDClassifier())
-    SGDClassifier_classifier.train(train_data)
-    print("SGDClassifier Algo Accuracy: ",
-        (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100)
+        SGDClassifier_classifier = SklearnClassifier(SGDClassifier())
+        SGDClassifier_classifier.train(train_data)
+        print("SGDClassifier Algo Accuracy: ",
+            (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100)
 
-    SVC_classifier = SklearnClassifier(SVC())
-    SVC_classifier.train(train_data)
-    print("SVC Algo Accuracy: ",
-        (nltk.classify.accuracy(SVC_classifier, test_data)) * 100)
+        SVC_classifier = SklearnClassifier(SVC())
+        SVC_classifier.train(train_data)
+        print("SVC Algo Accuracy: ",
+            (nltk.classify.accuracy(SVC_classifier, test_data)) * 100)
 
-    LinearSVC_classifier = SklearnClassifier(LinearSVC())
-    LinearSVC_classifier.train(train_data)
-    print("LinearSVC Algo Accuracy: ",
-        (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100)
+        LinearSVC_classifier = SklearnClassifier(LinearSVC())
+        LinearSVC_classifier.train(train_data)
+        print("LinearSVC Algo Accuracy: ",
+            (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100)
 
-    NuSVC_classifier = SklearnClassifier(NuSVC(gamma='auto'))
+        NuSVC_classifier = SklearnClassifier(NuSVC(gamma='auto'))
 
-    NuSVC_classifier.train(train_data)
-    print("NuSVC Algo Accuracy: ",
-        (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100)
+        NuSVC_classifier.train(train_data)
+        print("NuSVC Algo Accuracy: ",
+            (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100)
 
-    classifier = NaiveBayesClassifier.train(train_data)
+        classifier = NaiveBayesClassifier.train(train_data)
 
-    print("Accuracy is:", classify.accuracy(classifier, test_data))
+        print("Accuracy is:", classify.accuracy(classifier, test_data))
 
-    print(classifier.show_most_informative_features(10))
+        print(classifier.show_most_informative_features(10))
 
-    custom_tweet = " Bobiwine is contesting for presidency in 2021"
+        custom_tweet = " Bobiwine is contesting for presidency in 2021"
 
-    custom_tokens = remove_noise(word_tokenize(custom_tweet))
+        custom_tokens = remove_noise(word_tokenize(custom_tweet))
 
-    print(custom_tweet, classifier.classify(
-        dict([token, True] for token in custom_tokens)))
+        print(custom_tweet, classifier.classify(
+            dict([token, True] for token in custom_tokens)))
 
+        voted_classifier = VoteClassifier(classifier, MultinomialNBclassifier, BernoulliNB_classifier,
+                                        LogisticRegression_classifier, SGDClassifier_classifier, LinearSVC_classifier, NuSVC_classifier)
 
-    voted_classifier = VoteClassifier(classifier, MultinomialNBclassifier, BernoulliNB_classifier,
-                                    LogisticRegression_classifier, SGDClassifier_classifier, LinearSVC_classifier, NuSVC_classifier)
-
-    print("Voted Classifier Algo Accuracy: ",
-        (nltk.classify.accuracy(voted_classifier, test_data)) * 100)
+        print("Voted Classifier Algo Accuracy: ",
+            (nltk.classify.accuracy(voted_classifier, test_data)) * 100)
+    except:
+        print("An exception occurred")
 
 
 if __name__ == '__main__':
