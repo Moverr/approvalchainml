@@ -145,10 +145,12 @@ def index():
         negative_cleaned_tokens_list = []
 
         for tokens in positive_data_tokens:
-            positive_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+            positive_cleaned_tokens_list.append(
+                remove_noise(tokens, stop_words))
 
         for tokens in negative_data_tokens:
-            negative_cleaned_tokens_list.append(remove_noise(tokens, stop_words))
+            negative_cleaned_tokens_list.append(
+                remove_noise(tokens, stop_words))
 
         all_pos_words = get_all_words(positive_cleaned_tokens_list)
 
@@ -176,12 +178,12 @@ def index():
         test_data = dataset[5:]
 
         names = ["MultinomialNBclassifier", "BernoulliNB", "LogisticRegression_classifier", "SGDClassifier_classifier ",
-                "SVC_classifier", "LinearSVC_classifier", "NaiveBayesClassifier"]
+                 "SVC_classifier", "LinearSVC_classifier", "NaiveBayesClassifier"]
 
         MultinomialNBclassifier = SklearnClassifier(MultinomialNB())
         MultinomialNBclassifier.train(train_data)
         print("\nMultinomialNB Accuracy is:",
-            (classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
+              (classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
 
         # GaussianNBclassifier = SklearnClassifier(GaussianNB())
         # GaussianNBclassifier.train(train_data)
@@ -190,7 +192,7 @@ def index():
         BernoulliNB_classifier = SklearnClassifier(BernoulliNB())
         BernoulliNB_classifier.train(train_data)
         print("BernoulliNB_classifier Algo Accuracy: ",
-            (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
+              (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
 
         LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
         LogisticRegression_classifier.train(train_data)
@@ -200,23 +202,23 @@ def index():
         SGDClassifier_classifier = SklearnClassifier(SGDClassifier())
         SGDClassifier_classifier.train(train_data)
         print("SGDClassifier Algo Accuracy: ",
-            (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100)
+              (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100)
 
         SVC_classifier = SklearnClassifier(SVC())
         SVC_classifier.train(train_data)
         print("SVC Algo Accuracy: ",
-            (nltk.classify.accuracy(SVC_classifier, test_data)) * 100)
+              (nltk.classify.accuracy(SVC_classifier, test_data)) * 100)
 
         LinearSVC_classifier = SklearnClassifier(LinearSVC())
         LinearSVC_classifier.train(train_data)
         print("LinearSVC Algo Accuracy: ",
-            (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100)
+              (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100)
 
         NuSVC_classifier = SklearnClassifier(NuSVC(gamma='auto'))
 
         NuSVC_classifier.train(train_data)
         print("NuSVC Algo Accuracy: ",
-            (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100)
+              (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100)
 
         classifier = NaiveBayesClassifier.train(train_data)
 
@@ -232,10 +234,10 @@ def index():
             dict([token, True] for token in custom_tokens)))
 
         voted_classifier = VoteClassifier(classifier, MultinomialNBclassifier, BernoulliNB_classifier,
-                                        LogisticRegression_classifier, SGDClassifier_classifier, LinearSVC_classifier, NuSVC_classifier)
+                                          LogisticRegression_classifier, SGDClassifier_classifier, LinearSVC_classifier, NuSVC_classifier)
 
         print("Voted Classifier Algo Accuracy: ",
-            (nltk.classify.accuracy(voted_classifier, test_data)) * 100)
+              (nltk.classify.accuracy(voted_classifier, test_data)) * 100)
     except:
         print("An exception occurred")
 
