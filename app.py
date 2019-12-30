@@ -101,19 +101,23 @@ app = Flask(__name__)
 
 def showjson():
     SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-    json_url = os.path.join(SITE_ROOT, "static/data", "positive.json")
+    json_url = os.path.join(SITE_ROOT, "static/data", "data.json")
     data = json.load(open(json_url))
     return data
 
 
 @app.route('/')
 def index():
-        #   this is where the magic is begininig
+    #   this is where the magic is begininig
 
-    data_file = showjson()
+    SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
+    json_url = os.path.join(SITE_ROOT, "static", "data.json")
+    data = json.load(open(json_url))
+    
+ 
     # data ={}
-    with open(data_file) as f:
-        data = json.load(f)
+    # with open(data_file) as f:
+    #     data = json.load(f)
 
     print(data['False'][0])
 
@@ -183,10 +187,10 @@ def index():
     # GaussianNBclassifier.train(train_data)
     # print("\nGaussianNB Accuracy is:", classify.accuracy(GaussianNBclassifier, test_data))
 
-    BernoulliNB = SklearnClassifier(BernoulliNB())
-    BernoulliNB.train(train_data)
-    print("BernoulliNB Algo Accuracy: ",
-        (nltk.classify.accuracy(BernoulliNB, test_data)) * 100)
+    BernoulliNB_classifier = SklearnClassifier(BernoulliNB())
+    BernoulliNB_classifier.train(train_data)
+    print("BernoulliNB_classifier Algo Accuracy: ",
+        (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
 
     LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
     LogisticRegression_classifier.train(train_data)
@@ -228,7 +232,7 @@ def index():
         dict([token, True] for token in custom_tokens)))
 
 
-    voted_classifier = VoteClassifier(classifier, MultinomialNBclassifier, BernoulliNB,
+    voted_classifier = VoteClassifier(classifier, MultinomialNBclassifier, BernoulliNB_classifier,
                                     LogisticRegression_classifier, SGDClassifier_classifier, LinearSVC_classifier, NuSVC_classifier)
 
     print("Voted Classifier Algo Accuracy: ",
@@ -236,4 +240,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
