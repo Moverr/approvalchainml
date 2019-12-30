@@ -260,11 +260,22 @@ def index():
 
         output['NaiveBayesClassifier-ACCURACY'] =(  (nltk.classify.accuracy(classifier, test_data)) * 100) 
       
+      
+        cpdist = classifier._feature_probdist       # probability distribution for feature values given labels
+        feature_list = []
+        for (fname, fval) in classifier.most_informative_features(10):
+            def labelprob(l):
+                return cpdist[l, fname].prob(fval)
+            labels = sorted([l for l in classifier._labels if fval in cpdist[l, fname].samples()], 
+                            key=labelprob)
+            feature_list.append([fname, labels[-1]])
 
 
-        print(classifier.show_most_informative_features(10))
+ 
 
-        output['classifier-show_most_informative_features'] =( classifier.show_most_informative_features(10) ) 
+        print(feature_list)
+
+        output['classifier-show_most_informative_features'] ="".format(feature_list) 
       
 
         custom_content = " Bobiwine is contesting for presidency in 2021"
