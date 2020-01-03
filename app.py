@@ -1,5 +1,6 @@
 #!flask/bin/python
-from flask import Flask, render_template, url_for, json, jsonify
+from flask_cors import CORS
+from flask import Flask, render_template, url_for, json, request, jsonify
 
 
 import nltk
@@ -90,6 +91,7 @@ def get_all_words(cleaned_tokens_list):
     for tokens in cleaned_tokens_list:
         for token in tokens:
             yield token
+            67
 
 
 def get_tweets_for_model(cleaned_tokens_list):
@@ -98,6 +100,7 @@ def get_tweets_for_model(cleaned_tokens_list):
 
 
 app = Flask(__name__)
+CORS(app)
 
 
 def showjson():
@@ -107,11 +110,17 @@ def showjson():
     return data
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST', 'DELETE', 'PATCH'])
 def index():
     #   this is where the magic is begininig
     output = {}
-    
+    # custom_content = " Bobiwine is contesting for presidency in 2021"
+
+ 
+    if request.method == 'POST':
+            content = request.json
+            custom_content = content['custom_content']
+
     try:
 
         SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -124,10 +133,7 @@ def index():
 
         print(data['False'][0])
 
-        output['data'] =(data)
-
-
-
+        output['data'] = (data)
 
         positive_data = data['True']
         negative_data = data['False']
@@ -163,8 +169,7 @@ def index():
 
         freq_dist_pos = FreqDist(all_pos_words)
         print(freq_dist_pos.most_common(10))
-        output['most_common-10'] =(freq_dist_pos.most_common(10))
-        
+        output['most_common-10'] = (freq_dist_pos.most_common(10))
 
         positive_tokens_for_model = get_tweets_for_model(
             positive_cleaned_tokens_list)
@@ -182,8 +187,7 @@ def index():
         random.shuffle(dataset)
 
         print(len(dataset))
-        output['dataset-legth'] =(len(dataset))
-      
+        output['dataset-legth'] = (len(dataset))
 
         train_data = dataset[:5]
         test_data = dataset[5:]
@@ -193,9 +197,10 @@ def index():
 
         MultinomialNBclassifier = SklearnClassifier(MultinomialNB())
         MultinomialNBclassifier.train(train_data)
-        
-        output['nMultinomialNB-ACCURACY'] =(  (classify.accuracy(MultinomialNBclassifier, test_data)) * 100) 
-      
+
+        output['nMultinomialNB-ACCURACY'] = (
+            (classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
+
         print("\nMultinomialNB Accuracy is:",
               (nltk.classify.accuracy(MultinomialNBclassifier, test_data)) * 100)
 
@@ -208,42 +213,40 @@ def index():
         print("BernoulliNB_classifier Algo Accuracy: ",
               (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
 
-        output['BernoulliNB_classifier-ACCURACY'] =(  (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100) 
-      
-
+        output['BernoulliNB_classifier-ACCURACY'] = (
+            (nltk.classify.accuracy(BernoulliNB_classifier, test_data)) * 100)
 
         LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
         LogisticRegression_classifier.train(train_data)
         print("LogisticRegression Algo Accuracy: ",      (nltk.classify.accuracy(
             LogisticRegression_classifier, test_data)) * 100)
 
-        output['LogisticRegression-ACCURACY'] =(  (nltk.classify.accuracy(LogisticRegression_classifier, test_data)) * 100) 
-      
-
+        output['LogisticRegression-ACCURACY'] = (
+            (nltk.classify.accuracy(LogisticRegression_classifier, test_data)) * 100)
 
         SGDClassifier_classifier = SklearnClassifier(SGDClassifier())
         SGDClassifier_classifier.train(train_data)
         print("SGDClassifier Algo Accuracy: ",
               (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100)
 
-        output['SGDClassifier-ACCURACY'] =(  (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100) 
-      
+        output['SGDClassifier-ACCURACY'] = (
+            (nltk.classify.accuracy(SGDClassifier_classifier, test_data)) * 100)
 
         SVC_classifier = SklearnClassifier(SVC())
         SVC_classifier.train(train_data)
         print("SVC Algo Accuracy: ",
               (nltk.classify.accuracy(SVC_classifier, test_data)) * 100)
- 
-        output['SVC-ACCURACY'] =(  (nltk.classify.accuracy(SVC_classifier, test_data)) * 100) 
-      
+
+        output['SVC-ACCURACY'] = (
+            (nltk.classify.accuracy(SVC_classifier, test_data)) * 100)
 
         LinearSVC_classifier = SklearnClassifier(LinearSVC())
         LinearSVC_classifier.train(train_data)
         print("LinearSVC Algo Accuracy: ",
               (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100)
-      
-        output['LinearSVC-ACCURACY'] =(  (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100) 
-      
+
+        output['LinearSVC-ACCURACY'] = (
+            (nltk.classify.accuracy(LinearSVC_classifier, test_data)) * 100)
 
         NuSVC_classifier = SklearnClassifier(NuSVC(gamma='auto'))
 
@@ -251,42 +254,36 @@ def index():
         print("NuSVC Algo Accuracy: ",
               (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100)
 
-        output['NuSVC-ACCURACY'] =(  (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100) 
-      
+        output['NuSVC-ACCURACY'] = (
+            (nltk.classify.accuracy(NuSVC_classifier, test_data)) * 100)
 
         classifier = NaiveBayesClassifier.train(train_data)
 
         print("Accuracy is:", classify.accuracy(classifier, test_data))
 
-        output['NaiveBayesClassifier-ACCURACY'] =(  (nltk.classify.accuracy(classifier, test_data)) * 100) 
-      
-      
-        cpdist = classifier._feature_probdist       # probability distribution for feature values given labels
+        output['NaiveBayesClassifier-ACCURACY'] = (
+            (nltk.classify.accuracy(classifier, test_data)) * 100)
+
+        # probability distribution for feature values given labels
+        cpdist = classifier._feature_probdist
         feature_list = []
-        for (fname, fval) in classifier.most_informative_features(10):
+        for (fname, fval) in classifier.most_informative_features(100):
             def labelprob(l):
                 return cpdist[l, fname].prob(fval)
-            labels = sorted([l for l in classifier._labels if fval in cpdist[l, fname].samples()], 
+            labels = sorted([l for l in classifier._labels if fval in cpdist[l, fname].samples()],
                             key=labelprob)
             feature_list.append([fname, labels[-1]])
 
-
- 
-
         print(feature_list)
 
-        output['classifier-show_most_informative_features'] ="".format(feature_list) 
-      
+        output['classifier-show_most_informative_features'] = feature_list
 
-        custom_content = " Bobiwine is contesting for presidency in 2021"
-
-        output['custom-content'] = custom_content 
-      
-
+       
+        output['custom-content'] = custom_content
 
         custom_tokens = remove_noise(word_tokenize(custom_content))
 
-        print(custom_content, classifier.classify(
+        output['result'] = (custom_content, classifier.classify(
             dict([token, True] for token in custom_tokens)))
 
         voted_classifier = VoteClassifier(classifier, MultinomialNBclassifier, BernoulliNB_classifier,
@@ -295,9 +292,8 @@ def index():
         print("Voted Classifier Algo Accuracy: ",
               (nltk.classify.accuracy(voted_classifier, test_data)) * 100)
 
-        output['Voted Classifier Algo Accuracy'] =((nltk.classify.accuracy(voted_classifier, test_data)) * 100)
-
-      
+        output['Voted_Classifier_Algo_Accuracy'] = (
+            (nltk.classify.accuracy(voted_classifier, test_data)) * 100)
 
     except:
         print("An exception occurred")
